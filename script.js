@@ -39,6 +39,7 @@ function initializeBoard(width, height, minesCount) {
       cell.addEventListener('contextmenu', (event) => {
         event.preventDefault();
         toggleFlag(cell);
+        checkForWin(mineArray);
       });
       gameBoard.appendChild(cell);
     }
@@ -54,6 +55,31 @@ function toggleFlag(cell) {
     cell.innerHTML = '🚩'; // Place un drapeau
   }
 }
+
+function checkForWin(mineArray) {
+  let isWin = true;
+  for (let y = 0; y < mineArray.length; y++) {
+    for (let x = 0; x < mineArray[y].length; x++) {
+      const cell = document.getElementById(`cell-${y}-${x}`);
+      const isMine = mineArray[y][x] === 'M';
+      const isFlagged = cell.classList.contains('flagged');
+
+      if ((isMine && !isFlagged) || (!isMine && isFlagged)) {
+        isWin = false;
+        break;
+      }
+    }
+    if (!isWin) break;
+  }
+
+  if (isWin) {
+    const endTime = new Date();
+    const duration = Math.round((endTime - startTime) / 1000); // startTime devrait être défini au début de la partie
+    showVictoryMessage(duration);
+  }
+}
+
+
 
 function generateMinesArray(width, height, minesCount) {
   const mineArray = Array.from({ length: height }, () => Array(width).fill(0));
@@ -165,4 +191,23 @@ function endGame(mineArray, width, height) {
 
 function explode(cell) {
   cell.classList.add('explode');
+}
+
+function showVictoryMessage(duration) {
+  const modal = document.getElementById("victoryModal");
+  const victoryMessage = document.getElementById("victoryMessage");
+  victoryMessage.innerText = `Félicitations, vous avez gagné ! Durée de la partie : ${duration} secondes.`;
+  modal.style.display = "block";
+
+  const span = document.getElementsByClassName("close")[0];
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+
+  // Cliquez en dehors de la modale pour la fermer
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
 }
